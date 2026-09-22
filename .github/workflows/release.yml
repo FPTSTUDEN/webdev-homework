@@ -1,0 +1,62 @@
+name: Auto Verify and Release
+
+on:
+  push:
+    branches:
+      - main # Triggers when you push to the main branch
+# Add this block to grant write permissions to the repository contents
+permissions:
+  contents: write
+jobs:
+  build-and-release:
+    # Only runs if your commit message starts with "release:" (e.g., "release: A1")
+    if: startsWith(github.event.head_commit.message, 'release:')
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # Guideline Check 1: Run code AT LEAST once to verify functionality
+    # - name: Verify Code Functionality
+    #   run: |
+    #     echo "Running local verification..."
+    #     # Replace the line below with your actual execution command (e.g., python main.py)
+    #     python -m unittest discover -s tests || echo "Ensure code runs before releasing!"
+
+    # Guideline Check 2: Ensure completion status file exists
+    # - name: Verify Status File Exists
+    #   run: |
+    #     if [ ! -f "status.md" ] && [ ! -f "status.txt" ]; then
+    #       echo "ERROR: status.md or status.txt is missing! Grade reduction risk."
+    #       exit 1
+    #     fi
+
+# Parse the Tag from your commit message (handles multi-line safely)
+    - name: Extract Tag Name
+      id: get_tag
+      run: |
+        # 1. Get the very first line of the commit message
+        FIRST_LINE=$(echo "${{ github.event.head_commit.message }}" | head -n 1)
+        
+        # 2. Extract the tag (the second word after "release:")
+        TAG_NAME=$(echo "$FIRST_LINE" | cut -d' ' -f2)
+        
+        # 3. Write securely to $GITHUB_OUTPUT using EOF for safety
+        echo "tag<<EOF" >> $GITHUB_OUTPUT
+        echo "$TAG_NAME" >> $GITHUB_OUTPUT
+        echo "EOF" >> $GITHUB_OUTPUT
+
+    # Automate Steps 1-5 of the PDF: Create and publish the GitHub Release
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ steps.get_tag.outputs.tag }}
+        name: Release ${{ steps.get_tag.outputs.tag }}
+        body: |
+          Automated submission for ${{ steps.get_tag.outputs.tag }}.
+          Please find the completion status in the attached status.md file.
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
