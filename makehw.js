@@ -51,8 +51,8 @@ async function main() {
   fs.mkdirSync(folder, { recursive: true });
 
   for (let i = 1; i <= count; i++) {
-    fs.writeFileSync(path.join(folder, `html-question-${i}.html`), htmlTemplate(i, name));
-    fs.writeFileSync(path.join(folder, `js-question-${i}.js`), jsTemplate(i));
+    fs.writeFileSync(path.join(folder, `question-${i}.html`), htmlTemplate(i, name));
+    fs.writeFileSync(path.join(folder, `question-${i}.js`), jsTemplate(i));
   }
 
   console.log(`Created ${count * 2} files in ${folder}`);
