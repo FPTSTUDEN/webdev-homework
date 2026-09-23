@@ -25,7 +25,7 @@ const htmlTemplate = (n, name) => `<!DOCTYPE html>
   <input id="input" placeholder="Your answer">
   <button onclick="processInput()">Submit</button>
   <p id="output"></p>
-  <script src="js-question-${n}.js"></script>
+  <script src="question-${n}.js"></script>
 </body>
 </html>
 `;
