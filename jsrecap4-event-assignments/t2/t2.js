@@ -770,4 +770,26 @@ const restaurants = [
   },
 ];
 
+
 // your code here
+document.querySelector("#restaurant-list").innerHTML += restaurants.map(restaurant => `<tr class="restaurant-row" id="${restaurant._id}"><td>${restaurant.name}</td><td>${restaurant.address}</td></tr>`).sort().join("");
+// a.name.localeCompare(b.name)
+document.querySelectorAll(".restaurant-row").forEach(row => {
+  row.addEventListener("click", () => {
+    // add the "hightlight" class to the clicked row and remove it from other rows
+    let id = row.id;
+    let restaurant = restaurants.find(r => r._id === id);
+    
+    document.querySelectorAll(".restaurant-row").forEach(r => r.classList.remove("highlight"));
+    row.classList.add("highlight");
+    alert(`Restaurant: ${restaurant.name}
+      \nAddress: ${restaurant.address}
+      \nPostal Code: ${restaurant.postalCode}
+      \nCity: ${restaurant.city}
+      \nPhone: ${restaurant.phone}
+      \nCompany: ${restaurant.company}
+      `);
+  });
+});
+// . means that the class is being selected. In this case, it is selecting all elements with the class "restaurant-row".
+// # means that the id is being selected. In this case, it is selecting the element with the id "restaurant-list".
