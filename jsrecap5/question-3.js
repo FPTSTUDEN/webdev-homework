@@ -1,9 +1,10 @@
+"require('dotenv').config();"
 try {
   let response = await fetch('https://reqres.in/api/unknown/23', {
     method: 'GET',
     headers: {
       // 'Content-Type': 'application/json',
-      'x-api-key': 'free_user_3Jl2mztF6LWjokidOWy474F4osu'
+      'x-api-key': process.env.REQRES_API_KEY
     }
   });
   if (!response.ok) { // Check if the response status is not OK (e.g., 404, 500)

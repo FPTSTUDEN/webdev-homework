@@ -1,3 +1,4 @@
+"require('dotenv').config();"
 async function fetchData(url, options) {
   let response = await fetch(url, options);
   if (!response.ok) {
@@ -16,7 +17,7 @@ try {
       method: 'POST',
       headers: {
           'Content-Type': 'application/json',
-          'x-api-key': 'free_user_3Jl2mztF6LWjokidOWy474F4osu'
+          'x-api-key': process.env.REQRES_API_KEY
       },
       body: JSON.stringify(user)
     }

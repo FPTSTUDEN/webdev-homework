@@ -1,6 +1,7 @@
+"require('dotenv').config();"
 let header = {
   // 'Content-Type': 'application/json',
-  'x-api-key': 'free_user_3Jl2mztF6LWjokidOWy474F4osu'
+  'x-api-key': process.env.REQRES_API_KEY
 };
 let userData = {
   name: 'John Doe',
