@@ -777,55 +777,52 @@ async function getMenu(restaurant) {
   return  response.json();
 }
 const restaurant_api = "https://media2.edu.metropolia.fi/restaurant/api/v1/restaurants"
-let response = await fetch(restaurant_api
-  // , {
-  // // method: 'GET',
-  // headers: {
-  //   'Content-Type': 'application/json',
-  // }
-  // }
-);
-console.log(response);
-restaurants= await response.json().then(res=>console.log(res))
 
 const dialog = document.querySelector("dialog");
-// let reader = response.body.getReader();
-// // let done=false;
-// while (true) {
-//   const { value, done } = await reader.read();
-//   if (done) break;
-//   console.log('Chunk:', value);
-// }
-console.log(restaurants[1]);
+async function loadRestaurants() {
+  const response = await fetch(restaurant_api);
+  if (!response.ok) {
+    throw new Error("Error" + response.status);
+  }
 
-// your code here
-document.querySelector("#restaurant-list").innerHTML += restaurants.map(restaurant => `<tr class="restaurant-row" id="${restaurant._id}"><td>${restaurant.name}</td><td>${restaurant.address}</td></tr>`).sort().join("");
-// a.name.localeCompare(b.name)
-document.querySelectorAll(".restaurant-row").forEach(row => {
-  row.addEventListener("click", async function () {
-    // add the "hightlight" class to the clicked row and remove it from other rows
-    let id = row.id;
-    let restaurant = restaurants.find(r => r._id === id);
-    
-    document.querySelectorAll(".restaurant-row").forEach(r => r.classList.remove("highlight"));
-    row.classList.add("highlight");
-    const menu = getMenu(restaurant);
-        for (let course of menu.courses) {
-          dialog.innerHTML += `<p>${course.name} - ${course.price} - ${course.diets}</p>`;
-        }
-        dialog.innerHTML += `<button id="close">Close</button>`;
-        dialog.showModal();
-        document.querySelector('#close').addEventListener('click', function() {
-          dialog.close();
-        });
-    alert(`Restaurant: ${restaurant.name}
-      \nAddress: ${restaurant.address}
-      \nPostal Code: ${restaurant.postalCode}
-      \nCity: ${restaurant.city}
-      \nPhone: ${restaurant.phone}
-      \nCompany: ${restaurant.company}
-      `);
+  restaurants = await response.json();
+
+  document.querySelector("#restaurant-list").innerHTML += restaurants
+    .map(
+      restaurant =>
+        `<tr class="restaurant-row" id="${restaurant._id}"><td>${restaurant.name}</td><td>${restaurant.address}</td></tr>`,
+    )
+    .sort()
+    .join("");
+
+  document.querySelectorAll(".restaurant-row").forEach(row => {
+    row.addEventListener("click", async function () {
+      const restaurant = restaurants.find(r => r._id === row.id);
+
+      document.querySelectorAll(".restaurant-row").forEach(r => r.classList.remove("highlight"));
+      row.classList.add("highlight");
+
+      const menu = await getMenu(restaurant);
+      dialog.innerHTML = menu.courses
+        .map(course => `<p>${course.name} - ${course.price} - ${course.diets}</p>`)
+        .join("");
+      dialog.innerHTML += `<button id="close">Close</button>`;
+      dialog.showModal();
+      document.querySelector('#close').addEventListener('click', function () {
+        dialog.close();
+      });
+
+      alert(`Restaurant: ${restaurant.name}
+        \nAddress: ${restaurant.address}
+        \nPostal Code: ${restaurant.postalCode}
+        \nCity: ${restaurant.city}
+        \nPhone: ${restaurant.phone}
+        \nCompany: ${restaurant.company}
+        `);
+    });
   });
-});
+}
+
+loadRestaurants().catch(error => console.error("Could not load restaurants:", error));
 // . means that the class is being selected. In this case, it is selecting all elements with the class "restaurant-row".
 // # means that the id is being selected. In this case, it is selecting the element with the id "restaurant-list".
