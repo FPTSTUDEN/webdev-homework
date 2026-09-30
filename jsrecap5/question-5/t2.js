@@ -774,17 +774,20 @@ async function getMenu(restaurant) {
   if (!response.ok) {
     throw new Error("Error" + response.status);
   }
-  return await response.json();
+  return  response.json();
 }
 const restaurant_api = "https://media2.edu.metropolia.fi/restaurant/api/v1/restaurants"
-let response = await fetch(restaurant_api, {
-  // method: 'GET',
-  headers: {
-    'Content-Type': 'application/json',
-  }
-});
+let response = await fetch(restaurant_api
+  // , {
+  // // method: 'GET',
+  // headers: {
+  //   'Content-Type': 'application/json',
+  // }
+  // }
+);
 console.log(response);
-restaurants=response.json();
+restaurants= await response.json().then(res=>console.log(res))
+
 const dialog = document.querySelector("dialog");
 // let reader = response.body.getReader();
 // // let done=false;
@@ -799,14 +802,14 @@ console.log(restaurants[1]);
 document.querySelector("#restaurant-list").innerHTML += restaurants.map(restaurant => `<tr class="restaurant-row" id="${restaurant._id}"><td>${restaurant.name}</td><td>${restaurant.address}</td></tr>`).sort().join("");
 // a.name.localeCompare(b.name)
 document.querySelectorAll(".restaurant-row").forEach(row => {
-  row.addEventListener("click", async () => {
+  row.addEventListener("click", async function () {
     // add the "hightlight" class to the clicked row and remove it from other rows
     let id = row.id;
     let restaurant = restaurants.find(r => r._id === id);
     
     document.querySelectorAll(".restaurant-row").forEach(r => r.classList.remove("highlight"));
     row.classList.add("highlight");
-    const menu = await getMenu(restaurant);
+    const menu = getMenu(restaurant);
         for (let course of menu.courses) {
           dialog.innerHTML += `<p>${course.name} - ${course.price} - ${course.diets}</p>`;
         }
