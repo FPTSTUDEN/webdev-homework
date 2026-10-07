@@ -20,6 +20,8 @@ app.get('/api/v1/cats', (req, res) => {
   res.json(cats);
 });
 
+app.use('/public', express.static('public'));
+
 app.listen(port, hostname, () => {
   console.log(`Server running at http://${hostname}:${port}/`);
 });
