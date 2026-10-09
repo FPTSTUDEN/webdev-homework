@@ -41,4 +41,23 @@ const addCat = (cat) => {
   return { cat_id: newId };
 };
 
-export { listAllCats, findCatById, addCat };
+const updateCat = (id, cat) => {
+  const index = catItems.findIndex((item) => item.cat_id == id);
+  if (index !== -1) {
+    catItems[index] = cat; // Replace the existing cat data with the new data
+    // catItems[index] = { ...catItems[index], ...cat }; // Merge existing cat data with new data - Please note that this will overwrite existing fields with new values if they are provided in the `cat` object.
+    return true;
+  }
+  return false;
+};
+
+const deleteCat = (id) => {
+  const index = catItems.findIndex((item) => item.cat_id == id);
+  if (index !== -1) {
+    catItems.splice(index, 1);
+    return true;
+  }
+  return false;
+};
+
+export { listAllCats, findCatById, addCat, updateCat, deleteCat };

@@ -1,4 +1,4 @@
-import { addCat, findCatById, listAllCats } from '../models/cat-model.js';
+import { addCat, findCatById, listAllCats,updateCat } from '../models/cat-model.js';
 
 const getCat = (req, res) => {
   res.json(listAllCats());
@@ -24,11 +24,35 @@ const postCat = (req, res) => {
 };
 
 const putCat = (req, res) => {
-  res.json({ message: 'Cat item updated.' });
+  const cat = findCatById(req.params.id);
+  if (!cat) {
+    res.sendStatus(404);
+    return;
+  }
+
+  const updated = updateCat(req.params.id, req.body);
+  if (updated) {
+    res.status(200);
+    res.json({ message: 'Cat item updated.' });
+  } else {
+    res.sendStatus(400);
+  }
 };
 
 const deleteCat = (req, res) => {
-  res.json({ message: 'Cat item deleted.' });
+  const cat = findCatById(req.params.id);
+  if (!cat) {
+    res.sendStatus(404);
+    return;
+  }
+
+  const deleted = deleteCat(req.params.id);
+  if (deleted) {
+    res.status(200);
+    res.json({ message: 'Cat item deleted.' });
+  } else {
+    res.sendStatus(400);
+  }
 };
 
 export { getCat, getCatById, postCat, putCat, deleteCat };
