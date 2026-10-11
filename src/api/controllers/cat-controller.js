@@ -14,7 +14,17 @@ const getCatById = (req, res) => {
 };
 
 const postCat = (req, res) => {
-  const result = addCat(req.body);
+  console.log('req.file:', req.file); // Log the uploaded file information
+  console.log('req.body:', req.body); // Log the request body
+  if (!req.file) {
+    res.status(400).json({ message: 'No file uploaded.' });
+    return;
+  }
+  const catData = {
+    ...req.body,
+    filename: req.file?.filename,
+  };
+  const result = addCat(catData);
   if (result.cat_id) {
     res.status(201);
     res.json({ message: 'New cat added.', result });
