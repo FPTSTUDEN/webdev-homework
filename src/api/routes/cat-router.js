@@ -6,9 +6,8 @@ import {
   putCat,
   deleteCat,
 } from '../controllers/cat-controller.js';
-// import { upload } from '../middleware/upload.js';
 import multer from 'multer';
-import createThumbnail from '../middleware/upload.js';
+import { createThumbnail } from '../../middlewares/upload.js';
 const upload = multer({ dest: 'uploads/' });
 
 const catRouter = express.Router();

@@ -1,11 +1,15 @@
 import sharp from 'sharp';
+import { basename, dirname, join } from 'node:path';
 
 const createThumbnail = async (req, res, next) => {
   if (!req.file) {
     next();
     return;
   }
-  const thumbnailPath = `_thumb_${req.file.path}.png`;
+  const thumbnailPath = join(
+    dirname(req.file.path),
+    `_thumb_${basename(req.file.path)}.png`,
+  );
 
   try {
     await sharp(req.file.path)
