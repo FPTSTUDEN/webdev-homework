@@ -5,9 +5,18 @@ const createThumbnail = async (req, res, next) => {
     next();
     return;
   }
-  console.log(req.file.path);
-  // TODO: use file path to create 160x160 png thumbnail with sharp
-  next();
+  const thumbnailPath = `_thumb_${req.file.path}.png`;
+
+  try {
+    await sharp(req.file.path)
+      .resize(160, 160)
+      .png()
+      .toFile(thumbnailPath);
+    // req.file.thumbnailPath = thumbnailPath; // Store the thumbnail path in the request object for later use
+    next();
+  } catch (error) {
+    next(error);
+  }
 };
 
 export {createThumbnail};
