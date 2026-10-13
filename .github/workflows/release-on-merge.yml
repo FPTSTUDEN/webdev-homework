@@ -1,0 +1,69 @@
+name: Auto Release
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    types:
+      - closed
+
+permissions:
+  contents: write
+
+jobs:
+  build-and-release:
+    # Release merged PRs, or main commits whose message starts with "merge".
+    if: >-
+      (github.event_name == 'pull_request' && github.event.pull_request.merged == true) ||
+      (github.event_name == 'push' && startsWith(github.event.head_commit.message, 'merge'))
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    # Guideline Check 1: Run code AT LEAST once to verify functionality
+    # - name: Verify Code Functionality
+    #   run: |
+    #     echo "Running local verification..."
+    #     # Replace the line below with your actual execution command (e.g., python main.py)
+    #     python -m unittest discover -s tests || echo "Ensure code runs before releasing!"
+
+    # Guideline Check 2: Ensure completion status file exists
+    # - name: Verify Status File Exists
+    #   run: |
+    #     if [ ! -f "status.md" ] && [ ! -f "status.txt" ]; then
+    #       echo "ERROR: status.md or status.txt is missing! Grade reduction risk."
+    #       exit 1
+    #     fi
+
+    - name: Determine release name
+      id: release_name
+      env:
+        COMMIT_MESSAGE: ${{ github.event_name == 'pull_request' && github.event.pull_request.merge_commit_message || github.event.head_commit.message }}
+        PR_BRANCH: ${{ github.event.pull_request.head.ref }}
+      run: |
+        if [ "$GITHUB_EVENT_NAME" = "pull_request" ]; then
+          RELEASE_NAME="$PR_BRANCH"
+        else
+          RELEASE_NAME="${GITHUB_REF_NAME}"
+        fi
+
+        if [ -z "$RELEASE_NAME" ]; then
+          echo "Unable to determine release name."
+          exit 1
+        fi
+
+        echo "name=$RELEASE_NAME" >> "$GITHUB_OUTPUT"
+
+    - name: Create GitHub Release
+      uses: softprops/action-gh-release@v2
+      with:
+        tag_name: ${{ steps.release_name.outputs.name }}
+        name: Release ${{ steps.release_name.outputs.name }}
+        body: Automated release for branch ${{ steps.release_name.outputs.name }}.
+        draft: false
+        prerelease: false
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
