@@ -1,12 +1,15 @@
 import assert from 'node:assert/strict';
-import { access } from 'node:fs/promises';
-import { after, before, test } from 'node:test';
+import { access, rm } from 'node:fs/promises';
+import { after, afterEach, before, test } from 'node:test';
 import { join } from 'node:path';
 import sharp from 'sharp';
 import app from '../src/app.js';
 
 let server;
 let baseUrl;
+let createdCatId;
+let uploadedFilePath;
+let thumbnailPath;
 
 before(async () => {
   server = app.listen(0, '127.0.0.1');
@@ -17,6 +20,23 @@ before(async () => {
 
   const { port } = server.address();
   baseUrl = `http://127.0.0.1:${port}`;
+});
+
+afterEach(async () => {
+  if (createdCatId) {
+    await fetch(`${baseUrl}/api/v1/cats/${createdCatId}`, {
+      method: 'DELETE',
+    });
+  }
+
+  await Promise.all([
+    uploadedFilePath && rm(uploadedFilePath, { force: true }),
+    thumbnailPath && rm(thumbnailPath, { force: true }),
+  ]);
+
+  createdCatId = undefined;
+  uploadedFilePath = undefined;
+  thumbnailPath = undefined;
 });
 
 after(async () => {
@@ -59,8 +79,9 @@ test('uploads an image and creates a cat record', async () => {
   );
 
   assert.ok(uploadedCat?.filename, 'saved cat should have an uploaded filename');
-  const uploadedFilePath = join('uploads', uploadedCat.filename);
-  const thumbnailPath = join('uploads', `_thumb_${uploadedCat.filename}.png`);
+  createdCatId = responseBody.result.cat_id;
+  uploadedFilePath = join('uploads', uploadedCat.filename);
+  thumbnailPath = join('uploads', `_thumb_${uploadedCat.filename}.png`);
   await access(uploadedFilePath);
   await access(thumbnailPath);
 

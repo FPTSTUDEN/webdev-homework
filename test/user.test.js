@@ -1,9 +1,10 @@
 import assert from 'node:assert/strict';
-import { after, before, test } from 'node:test';
+import { after, afterEach, before, test } from 'node:test';
 import app from '../src/app.js';
 
 let server;
 let baseUrl;
+let createdUserId;
 
 before(async () => {
   server = app.listen(0, '127.0.0.1');
@@ -12,6 +13,15 @@ before(async () => {
     server.once('error', reject);
   });
   baseUrl = `http://127.0.0.1:${server.address().port}`;
+});
+
+afterEach(async () => {
+  if (createdUserId) {
+    await fetch(`${baseUrl}/api/v1/users/${createdUserId}`, {
+      method: 'DELETE',
+    });
+    createdUserId = undefined;
+  }
 });
 
 after(() => server.close());
@@ -34,6 +44,7 @@ test('creates, updates, and deletes a user', async () => {
   assert.ok(created.result.user_id);
 
   const userId = created.result.user_id;
+  createdUserId = userId;
   const updatedResponse = await fetch(`${baseUrl}/api/v1/users/${userId}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
