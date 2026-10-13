@@ -1,11 +1,18 @@
-import { addCat, findCatById, listAllCats,updateCat } from '../models/cat-model.js';
+import {
+  addCat,
+  findCatById,
+  listAllCats,
+  modifyCat,
+  removeCat,
+} from '../models/cat-model.js';
 
-const getCat = (req, res) => {
-  res.json(listAllCats());
+const getCat = async (req, res) => {
+  const cats = await listAllCats();
+  res.json(cats);
 };
 
-const getCatById = (req, res) => {
-  const cat = findCatById(req.params.id);
+const getCatById = async (req, res) => {
+  const cat = await findCatById(req.params.id);
   if (cat) {
     res.json(cat);
   } else {
@@ -13,7 +20,7 @@ const getCatById = (req, res) => {
   }
 };
 
-const postCat = (req, res) => {
+const postCat = async (req, res) => {
   console.log('req.file:', req.file); // Log the uploaded file information
   console.log('req.body:', req.body); // Log the request body
   if (!req.file) {
@@ -24,8 +31,8 @@ const postCat = (req, res) => {
     ...req.body,
     filename: req.file?.filename,
   };
-  const result = addCat(catData);
-  if (result.cat_id) {
+  const result = await addCat(catData);
+  if (result?.cat_id) {
     res.status(201);
     res.json({ message: 'New cat added.', result });
   } else {
@@ -33,14 +40,14 @@ const postCat = (req, res) => {
   }
 };
 
-const putCat = (req, res) => {
-  const cat = findCatById(req.params.id);
+const putCat = async (req, res) => {
+  const cat = await findCatById(req.params.id);
   if (!cat) {
     res.sendStatus(404);
     return;
   }
 
-  const updated = updateCat(req.params.id, req.body);
+  const updated = await modifyCat(req.body, req.params.id);
   if (updated) {
     res.status(200);
     res.json({ message: 'Cat item updated.' });
@@ -49,14 +56,14 @@ const putCat = (req, res) => {
   }
 };
 
-const deleteCat = (req, res) => {
-  const cat = findCatById(req.params.id);
+const deleteCat = async (req, res) => {
+  const cat = await findCatById(req.params.id);
   if (!cat) {
     res.sendStatus(404);
     return;
   }
 
-  const deleted = deleteCat(req.params.id);
+  const deleted = await removeCat(req.params.id);
   if (deleted) {
     res.status(200);
     res.json({ message: 'Cat item deleted.' });

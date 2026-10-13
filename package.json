@@ -5,7 +5,7 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
-    "test": "node --test test/upload.test.js",
+    "test": "node --test test/*.test.js",
     "dev": "nodemon src/index.js",
     "start": "node src/index.js"
   },
