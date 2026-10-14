@@ -1,64 +1,77 @@
-const catItems = [
-  {
-    cat_id: 9592,
-    cat_name: 'Frank',
-    weight: 11,
-    owner: 3609,
-    filename: 'f3dbafakjsdfhg4',
-    birthdate: '2021-10-12',
-  },
-  {
-    cat_id: 9590,
-    cat_name: 'Mittens',
-    weight: 8,
-    owner: 3602,
-    filename: 'f3dasdfkjsdfhgasdf',
-    birthdate: '2021-10-12',
-  },
-];
+// Database operations are asynchronous and must be awaited by controllers.
+import promisePool from '../../utils/database.js';
 
-const listAllCats = () => {
-  return catItems;
+const listAllCats = async () => {
+  const [rows] = await promisePool.query(
+    `SELECT wsk_cats.*, wsk_users.name AS owner_name
+     FROM wsk_cats
+     LEFT JOIN wsk_users ON wsk_cats.owner = wsk_users.user_id`,
+  );
+  return rows;
 };
 
-const findCatById = (id) => {
-  return catItems.find((item) => item.cat_id == id);
-};
-
-const addCat = (cat, filename) => {
-  const { cat_name, weight, owner, birthdate } = cat;
-  const savedFilename = filename ?? cat.filename ?? cat.file?.filename;
-  const newId = catItems[0].cat_id + 1;
-
-  catItems.unshift({
-    cat_id: newId,
-    cat_name,
-    weight,
-    owner,
-    filename: savedFilename,
-    birthdate,
-  });
-
-  return { cat_id: newId };
-};
-
-const updateCat = (id, cat) => {
-  const index = catItems.findIndex((item) => item.cat_id == id);
-  if (index !== -1) {
-    catItems[index] = cat; // Replace the existing cat data with the new data
-    // catItems[index] = { ...catItems[index], ...cat }; // Merge existing cat data with new data - Please note that this will overwrite existing fields with new values if they are provided in the `cat` object.
-    return true;
+const findCatById = async (id) => {
+  const [rows] = await promisePool.execute(
+    `SELECT wsk_cats.*, wsk_users.name AS owner_name
+     FROM wsk_cats
+     LEFT JOIN wsk_users ON wsk_cats.owner = wsk_users.user_id
+     WHERE wsk_cats.cat_id = ?`,
+    [id],
+  );
+  if (rows.length === 0) {
+    return false;
   }
-  return false;
+  return rows[0];
 };
 
-const deleteCat = (id) => {
-  const index = catItems.findIndex((item) => item.cat_id == id);
-  if (index !== -1) {
-    catItems.splice(index, 1);
-    return true;
+const listCatsByUserId = async (userId) => {
+  const [rows] = await promisePool.execute(
+    `SELECT wsk_cats.*, wsk_users.name AS owner_name
+     FROM wsk_cats
+     LEFT JOIN wsk_users ON wsk_cats.owner = wsk_users.user_id
+     WHERE wsk_cats.owner = ?`,
+    [userId],
+  );
+  return rows;
+};
+
+const addCat = async (cat) => {
+  const { cat_name, weight, owner, filename, birthdate } = cat;
+  const sql = `INSERT INTO wsk_cats (cat_name, weight, owner, filename, birthdate)
+               VALUES (?, ?, ?, ?, ?)`;
+  const params = [cat_name, weight, owner, filename, birthdate];
+  const [result] = await promisePool.execute(sql, params);
+  if (result.affectedRows === 0) {
+    return false;
   }
-  return false;
+  return { cat_id: result.insertId };
 };
 
-export { listAllCats, findCatById, addCat, updateCat, deleteCat };
+const modifyCat = async (cat, id) => {
+  const sql = promisePool.format('UPDATE wsk_cats SET ? WHERE cat_id = ?', [cat, id]);
+  const [result] = await promisePool.execute(sql);
+  if (result.affectedRows === 0) {
+    return false;
+  }
+  return { message: 'success' };
+};
+
+const removeCat = async (id) => {
+  const [result] = await promisePool.execute(
+    'DELETE FROM wsk_cats WHERE cat_id = ?',
+    [id],
+  );
+  if (result.affectedRows === 0) {
+    return false;
+  }
+  return { message: 'success' };
+};
+
+export {
+  listAllCats,
+  findCatById,
+  listCatsByUserId,
+  addCat,
+  modifyCat,
+  removeCat,
+};
