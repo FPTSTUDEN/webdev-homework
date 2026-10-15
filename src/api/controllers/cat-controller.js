@@ -78,4 +78,21 @@ const deleteCat = async (req, res) => {
   }
 };
 
-export { getCat, getCatsByUserId, getCatById, postCat, putCat, deleteCat };
+const forwardErrors = (handler) => (req, res, next) =>
+  Promise.resolve(handler(req, res)).catch(next);
+
+const getCatHandler = forwardErrors(getCat);
+const getCatsByUserIdHandler = forwardErrors(getCatsByUserId);
+const getCatByIdHandler = forwardErrors(getCatById);
+const postCatHandler = forwardErrors(postCat);
+const putCatHandler = forwardErrors(putCat);
+const deleteCatHandler = forwardErrors(deleteCat);
+
+export {
+  getCatHandler as getCat,
+  getCatsByUserIdHandler as getCatsByUserId,
+  getCatByIdHandler as getCatById,
+  postCatHandler as postCat,
+  putCatHandler as putCat,
+  deleteCatHandler as deleteCat,
+};

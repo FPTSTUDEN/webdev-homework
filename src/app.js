@@ -1,5 +1,9 @@
 import express from 'express';
 import api from './api/index.js';
+import {
+  notFoundHandler,
+  errorHandler,
+} from './middlewares/error-handlers.js';
 
 const app = express();
 
@@ -12,5 +16,8 @@ app.get('/', (req, res) => {
 
 app.use('/api/v1', api);
 app.use('/public', express.static('public'));
+
+app.use(notFoundHandler);
+app.use(errorHandler);
 
 export default app;

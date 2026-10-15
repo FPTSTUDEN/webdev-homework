@@ -4,6 +4,7 @@ import { after, afterEach, before, test } from 'node:test';
 import { join } from 'node:path';
 import sharp from 'sharp';
 import app from '../src/app.js';
+import { createThumbnail } from '../src/middlewares/upload.js';
 
 let server;
 let baseUrl;
@@ -43,6 +44,29 @@ after(async () => {
   await new Promise((resolve, reject) => {
     server.close((error) => (error ? reject(error) : resolve()));
   });
+});
+
+test('rejects a cat upload without an image', async () => {
+  const response = await fetch(`${baseUrl}/api/v1/cats`, {
+    method: 'POST',
+    body: new FormData(),
+  });
+  const responseBody = await response.json();
+
+  assert.equal(response.status, 400);
+  assert.equal(responseBody.message, 'No file uploaded.');
+});
+
+test('forwards thumbnail generation errors to the error handler', async () => {
+  const error = await new Promise((resolve) => {
+    createThumbnail(
+      { file: { path: 'missing-image-for-thumbnail-test.png' } },
+      {},
+      resolve,
+    );
+  });
+
+  assert.ok(error instanceof Error);
 });
 
 test('uploads an image and creates a cat record', async () => {
