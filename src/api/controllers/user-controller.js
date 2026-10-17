@@ -48,4 +48,19 @@ const deleteUser = async (req, res) => {
   }
 };
 
-export { getUser, getUserById, postUser, putUser, deleteUser };
+const forwardErrors = (handler) => (req, res, next) =>
+  Promise.resolve(handler(req, res)).catch(next);
+
+const getUserHandler = forwardErrors(getUser);
+const getUserByIdHandler = forwardErrors(getUserById);
+const postUserHandler = forwardErrors(postUser);
+const putUserHandler = forwardErrors(putUser);
+const deleteUserHandler = forwardErrors(deleteUser);
+
+export {
+  getUserHandler as getUser,
+  getUserByIdHandler as getUserById,
+  postUserHandler as postUser,
+  putUserHandler as putUser,
+  deleteUserHandler as deleteUser,
+};

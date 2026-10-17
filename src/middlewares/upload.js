@@ -1,5 +1,8 @@
+import multer from 'multer';
 import sharp from 'sharp';
 import { basename, dirname, join } from 'node:path';
+
+const upload = multer({ dest: 'uploads/' });
 
 const createThumbnail = async (req, res, next) => {
   if (!req.file) {
@@ -23,4 +26,4 @@ const createThumbnail = async (req, res, next) => {
   }
 };
 
-export {createThumbnail};
+export { upload, createThumbnail };

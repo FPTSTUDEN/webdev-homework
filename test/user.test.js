@@ -1,6 +1,7 @@
 import assert from 'node:assert/strict';
 import { after, afterEach, before, test } from 'node:test';
 import app from '../src/app.js';
+import { closeDatabase } from '../src/utils/database.js';
 
 let server;
 let baseUrl;
@@ -24,7 +25,42 @@ afterEach(async () => {
   }
 });
 
-after(() => server.close());
+after(async () => {
+  await new Promise((resolve, reject) => {
+    server.close((error) => (error ? reject(error) : resolve()));
+  });
+  await closeDatabase();
+});
+
+test('rejects invalid user input before database access', async () => {
+  const response = await fetch(`${baseUrl}/api/v1/users`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: '  ',
+      username: 'x',
+      email: 'not-an-email',
+      role: 'root',
+      password: 'short',
+    }),
+  });
+  const responseBody = await response.json();
+
+  assert.equal(response.status, 400);
+  assert.equal(responseBody.errors.length, 5);
+});
+
+test('rejects an empty user update', async () => {
+  const response = await fetch(`${baseUrl}/api/v1/users/1`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({}),
+  });
+  const responseBody = await response.json();
+
+  assert.equal(response.status, 400);
+  assert.equal(responseBody.errors[0].msg, 'At least one field is required');
+});
 
 test('creates, updates, and deletes a user', async () => {
   const createdResponse = await fetch(`${baseUrl}/api/v1/users`, {

@@ -19,4 +19,7 @@ const pool = mysql.createPool({
 // promise pool is asynchronous version of the pool and
 // returns promises, which is used with async/await syntax
 const promisePool = pool.promise();
+const closeDatabase = () => promisePool.end();
+
+export { closeDatabase };
 export default promisePool;
