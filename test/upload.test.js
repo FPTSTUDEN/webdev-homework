@@ -9,6 +9,7 @@ import { createThumbnail } from '../src/middlewares/upload.js';
 let server;
 let baseUrl;
 let createdCatId;
+let createdOwnerId;
 let uploadedFilePath;
 let thumbnailPath;
 
@@ -29,6 +30,11 @@ afterEach(async () => {
       method: 'DELETE',
     });
   }
+  if (createdOwnerId) {
+    await fetch(`${baseUrl}/api/v1/users/${createdOwnerId}`, {
+      method: 'DELETE',
+    });
+  }
 
   await Promise.all([
     uploadedFilePath && rm(uploadedFilePath, { force: true }),
@@ -36,6 +42,7 @@ afterEach(async () => {
   ]);
 
   createdCatId = undefined;
+  createdOwnerId = undefined;
   uploadedFilePath = undefined;
   thumbnailPath = undefined;
 });
@@ -87,6 +94,21 @@ test('rejects invalid cat fields before creating a record', async () => {
 });
 
 test('uploads an image and creates a cat record', async () => {
+  const ownerResponse = await fetch(`${baseUrl}/api/v1/users`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: 'Upload Test Owner',
+      username: `up${Date.now()}`,
+      email: `up${Date.now()}@example.com`,
+      role: 'user',
+      password: 'password123',
+    }),
+  });
+  const owner = await ownerResponse.json();
+  assert.equal(ownerResponse.status, 201);
+  createdOwnerId = owner.result.user_id;
+
   const image = await sharp({
     create: {
       width: 1,
@@ -100,7 +122,7 @@ test('uploads an image and creates a cat record', async () => {
   const form = new FormData();
   form.set('cat_name', 'Upload test cat');
   form.set('weight', '5');
-  form.set('owner', '123');
+  form.set('owner', String(createdOwnerId));
   form.set('birthdate', '2024-01-01');
   form.set('image', new Blob([image], { type: 'image/png' }), 'cat.png');
 
