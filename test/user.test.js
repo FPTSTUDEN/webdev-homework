@@ -26,6 +26,24 @@ afterEach(async () => {
 
 after(() => server.close());
 
+test('rejects invalid user input before database access', async () => {
+  const response = await fetch(`${baseUrl}/api/v1/users`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      name: '  ',
+      username: 'x',
+      email: 'not-an-email',
+      role: 'root',
+      password: 'short',
+    }),
+  });
+  const responseBody = await response.json();
+
+  assert.equal(response.status, 400);
+  assert.equal(responseBody.errors.length, 5);
+});
+
 test('creates, updates, and deletes a user', async () => {
   const createdResponse = await fetch(`${baseUrl}/api/v1/users`, {
     method: 'POST',

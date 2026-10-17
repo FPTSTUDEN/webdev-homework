@@ -54,7 +54,7 @@ test('rejects a cat upload without an image', async () => {
   const responseBody = await response.json();
 
   assert.equal(response.status, 400);
-  assert.equal(responseBody.message, 'No file uploaded.');
+  assert.ok(responseBody.errors.length > 0);
 });
 
 test('forwards thumbnail generation errors to the error handler', async () => {
@@ -67,6 +67,23 @@ test('forwards thumbnail generation errors to the error handler', async () => {
   });
 
   assert.ok(error instanceof Error);
+});
+
+test('rejects invalid cat fields before creating a record', async () => {
+  const form = new FormData();
+  form.set('cat_name', ' ');
+  form.set('weight', '-1');
+  form.set('owner', 'not-a-user-id');
+  form.set('birthdate', 'not-a-date');
+
+  const response = await fetch(`${baseUrl}/api/v1/cats`, {
+    method: 'POST',
+    body: form,
+  });
+  const responseBody = await response.json();
+
+  assert.equal(response.status, 400);
+  assert.equal(responseBody.errors.length, 4);
 });
 
 test('uploads an image and creates a cat record', async () => {
