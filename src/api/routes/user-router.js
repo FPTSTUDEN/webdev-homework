@@ -7,7 +7,10 @@ import {
   putUser,
   deleteUser,
 } from '../controllers/user-controller.js';
-import { validationErrors } from '../../middlewares/validation.js';
+import {
+  validationErrors,
+  requireOneField,
+} from '../../middlewares/validation.js';
 
 const userFields = {
   name: body('name').trim().isLength({ min: 1, max: 100 }),
@@ -38,6 +41,7 @@ userRouter.route('/:id').get(userId, validationErrors, getUserById)
     body('role').optional().trim().isIn(['user', 'admin']),
     body('password').optional().trim().isLength({ min: 8, max: 255 }),
     validationErrors,
+    requireOneField(['name', 'username', 'email', 'role', 'password']),
     putUser,
   )
   .delete(userId, validationErrors, deleteUser);

@@ -10,4 +10,13 @@ const validationErrors = (req, res, next) => {
   next();
 };
 
-export { validationErrors };
+const requireOneField = (fields) => (req, res, next) => {
+  if (!fields.some((field) => req.body[field] !== undefined)) {
+    return res.status(400).json({
+      errors: [{ msg: 'At least one field is required', path: 'body' }],
+    });
+  }
+  next();
+};
+
+export { validationErrors, requireOneField };

@@ -9,7 +9,10 @@ import {
   deleteCat,
 } from '../controllers/cat-controller.js';
 import { upload, createThumbnail } from '../../middlewares/upload.js';
-import { validationErrors } from '../../middlewares/validation.js';
+import {
+  validationErrors,
+  requireOneField,
+} from '../../middlewares/validation.js';
 
 const catFields = {
   cat_name: body('cat_name').trim().isLength({ min: 1, max: 100 }),
@@ -40,6 +43,7 @@ catRouter.route('/:id').get(catId, validationErrors, getCatById)
     body('owner').optional().isInt({ min: 1 }).toInt(),
     body('birthdate').optional().isISO8601().toDate(),
     validationErrors,
+    requireOneField(['cat_name', 'weight', 'owner', 'birthdate']),
     putCat,
   )
   .delete(catId, validationErrors, deleteCat);
