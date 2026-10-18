@@ -1,3 +1,4 @@
+import bcrypt from 'bcrypt';
 import {
   addUser,
   deleteUser as deleteUserItem,
@@ -21,6 +22,7 @@ const getUserById = async (req, res) => {
 };
 
 const postUser = async (req, res) => {
+  req.body.password = bcrypt.hashSync(req.body.password, 10);
   const result = await addUser(req.body);
   if (result?.user_id) {
     res.status(201);

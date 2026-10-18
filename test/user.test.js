@@ -2,6 +2,7 @@ import assert from 'node:assert/strict';
 import { after, afterEach, before, test } from 'node:test';
 import app from '../src/app.js';
 import { closeDatabase } from '../src/utils/database.js';
+import bcrypt from 'bcrypt';
 
 let server;
 let baseUrl;
@@ -78,6 +79,30 @@ test('creates, updates, and deletes a user', async () => {
 
   assert.equal(createdResponse.status, 201);
   assert.ok(created.result.user_id);
+
+  const createdUserResponse = await fetch(
+    `${baseUrl}/api/v1/users/${created.result.user_id}`,
+  );
+  const createdUser = await createdUserResponse.json();
+  assert.notEqual(createdUser.password, 'password');
+  assert.equal(bcrypt.compareSync('password', createdUser.password), true);
+
+  const loginResponse = await fetch(`${baseUrl}/api/v1/auth/login`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ username: 'testuser', password: 'password' }),
+  });
+  const login = await loginResponse.json();
+  assert.equal(loginResponse.status, 200);
+  assert.ok(login.token);
+  assert.equal(login.user.password, undefined);
+
+  const meResponse = await fetch(`${baseUrl}/api/v1/auth/me`, {
+    headers: { Authorization: `Bearer ${login.token}` },
+  });
+  const me = await meResponse.json();
+  assert.equal(me.username, 'testuser');
+  assert.equal(me.password, undefined);
 
   const userId = created.result.user_id;
   createdUserId = userId;
