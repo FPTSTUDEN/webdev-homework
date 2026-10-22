@@ -1,3 +1,5 @@
+import { useState } from 'react';
+
 const mediaArray = [
   {
     media_id: 8,
@@ -38,6 +40,8 @@ const mediaArray = [
 import MediaRow from './MediaRow';
 
 const Home = () => {
+  const [selectedItem, setSelectedItem] = useState(null);
+
   return (
     <>
       <h2>My Media</h2>
