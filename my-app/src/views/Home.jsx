@@ -37,8 +37,8 @@ const mediaArray = [
   },
 ];
 
-import MediaRow from './MediaRow';
-import SingleView from './SingleView';
+import MediaRow from '../components/MediaRow';
+import SingleView from '../components/SingleView';
 
 const Home = () => {
   const [selectedItem, setSelectedItem] = useState(null);
