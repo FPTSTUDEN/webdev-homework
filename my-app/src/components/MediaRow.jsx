@@ -1,15 +1,17 @@
-const MediaRow = ({ item, setSelectedItem }) => {
+import { Link } from 'react-router';
+
+const MediaRow = ({ item }) => {
   return (
     <tr>
       <td>
-        <button type="button" onClick={() => setSelectedItem(item)}>
+        <Link to="/single" state={{ item }}>
           <img src={item.filename} alt={item.title} />
-        </button>
+        </Link>
       </td>
       <td>
-        <button type="button" onClick={() => setSelectedItem(item)}>
+        <Link to="/single" state={{ item }}>
           {item.title}
-        </button>
+        </Link>
       </td>
       <td>{item.description}</td>
       <td>{new Date(item.created_at).toLocaleDateString()}</td>
