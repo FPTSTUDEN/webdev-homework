@@ -7,14 +7,17 @@ const Home = () => {
 
   useEffect(() => {
     const getMedia = async () => {
-      const json = await fetchData('test.json');
-      setMediaArray(json);
+      try {
+        const json = await fetchData('test.json');
+        setMediaArray(json);
+        console.log(json);
+      } catch (error) {
+        console.error(error);
+      }
     };
 
     getMedia();
   }, []);
-
-  console.log(mediaArray);
 
   return (
     <>
