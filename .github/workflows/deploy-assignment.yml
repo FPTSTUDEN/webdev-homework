@@ -7,15 +7,26 @@ on:
 
 permissions:
   contents: write
+  pages: write
+  id-token: write
 
 jobs:
   deploy:
     if: startsWith(github.event.head_commit.message, 'assignment:')
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
 
     steps:
       - name: Check out repository
         uses: actions/checkout@v4
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
 
       - name: Extract assignment folder
         id: assignment
@@ -52,11 +63,35 @@ jobs:
           ASSIGNMENT: ${{ steps.assignment.outputs.name }}
         run: pnpm exec vite build --base "/${REPOSITORY_NAME}/${ASSIGNMENT}/"
 
-      - name: Publish to GitHub Pages
+      - name: Check out existing published assignments
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: published
+
+      - name: Add assignment build to Pages artifact
+        env:
+          ASSIGNMENT: ${{ steps.assignment.outputs.name }}
+          REPOSITORY_NAME: ${{ github.event.repository.name }}
+        run: |
+          rm -rf published/.git
+          mkdir -p "published/$ASSIGNMENT"
+          cp -R my-app/dist/. "published/$ASSIGNMENT/"
+          printf '<!doctype html>\n<html lang="en">\n<head><meta charset="utf-8"><title>Published assignments</title></head>\n<body><h1>Published assignments</h1><p><a href="/%s/%s/">%s</a></p></body>\n</html>\n' \
+            "$REPOSITORY_NAME" "$ASSIGNMENT" "$ASSIGNMENT" > published/index.html
+
+      - name: Save published assignments
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           publish_branch: gh-pages
-          publish_dir: my-app/dist
-          destination_dir: ${{ steps.assignment.outputs.name }}
-          keep_files: true
+          publish_dir: published
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: published
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
