@@ -1,0 +1,62 @@
+name: Deploy assignment
+
+on:
+  push:
+    branches:
+      - main
+
+permissions:
+  contents: write
+
+jobs:
+  deploy:
+    if: startsWith(github.event.head_commit.message, 'assignment:')
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Extract assignment folder
+        id: assignment
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          assignment="$(printf '%s\n' "$COMMIT_MESSAGE" | head -n 1 | sed -E 's/^assignment:[[:space:]]*//')"
+          if [[ ! "$assignment" =~ ^[a-z0-9][a-z0-9-]*$ ]]; then
+            echo "Commit subject must be 'assignment: <lowercase-name>' (letters, numbers, and hyphens only)." >&2
+            exit 1
+          fi
+          echo "name=$assignment" >> "$GITHUB_OUTPUT"
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: my-app/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: my-app
+        run: pnpm install --frozen-lockfile
+
+      - name: Build app
+        working-directory: my-app
+        env:
+          REPOSITORY_NAME: ${{ github.event.repository.name }}
+          ASSIGNMENT: ${{ steps.assignment.outputs.name }}
+        run: pnpm exec vite build --base "/${REPOSITORY_NAME}/${ASSIGNMENT}/"
+
+      - name: Publish to GitHub Pages
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: my-app/dist
+          destination_dir: ${{ steps.assignment.outputs.name }}
+          keep_files: true
