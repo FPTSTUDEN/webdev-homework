@@ -1,14 +1,21 @@
 import useForm from '../hooks/formHooks';
+import { useAuthentication } from '../hooks/apiHooks';
 
 const LoginForm = () => {
+  const { postLogin } = useAuthentication();
+
   const initValues = {
     username: '',
     password: '',
   };
 
-  const doLogin = () => {
-    console.log(inputs);
-    // TODO: add login functionalities here
+  const doLogin = async (formInputs) => {
+    try {
+      const loginResult = await postLogin(formInputs);
+      console.log(loginResult);
+    } catch (error) {
+      console.error('Login failed:', error);
+    }
   };
 
   const { inputs, handleInputChange, handleSubmit } = useForm(doLogin, initValues);
