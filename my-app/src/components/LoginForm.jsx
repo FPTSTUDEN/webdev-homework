@@ -1,8 +1,10 @@
+import { useNavigate } from 'react-router';
 import useForm from '../hooks/formHooks';
 import { useAuthentication } from '../hooks/apiHooks';
 
 const LoginForm = () => {
   const { postLogin } = useAuthentication();
+  const navigate = useNavigate();
 
   const initValues = {
     username: '',
@@ -12,7 +14,11 @@ const LoginForm = () => {
   const doLogin = async (formInputs) => {
     try {
       const loginResult = await postLogin(formInputs);
-      console.log(loginResult);
+      if (!loginResult.token) {
+        throw new Error('Login response did not include a token');
+      }
+      localStorage.setItem('token', loginResult.token);
+      navigate('/');
     } catch (error) {
       console.error('Login failed:', error);
     }
