@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import { fetchData } from '../utils/fetchData';
 
 const useMedia = () => {
@@ -21,6 +21,20 @@ const useMedia = () => {
   return { mediaArray };
 };
 
+const useUser = () => {
+  const getUserByToken = useCallback(async (token) => {
+    const fetchOptions = {
+      method: 'GET',
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+    return fetchData(`${import.meta.env.VITE_AUTH_API}/users/token`, fetchOptions);
+  }, []);
+
+  return { getUserByToken };
+};
+
 const useAuthentication = () => {
   const postLogin = async (inputs) => {
     const fetchOptions = {
@@ -40,4 +54,4 @@ const useAuthentication = () => {
   return { postLogin };
 };
 
-export { useAuthentication, useMedia };
+export { useAuthentication, useMedia, useUser };
