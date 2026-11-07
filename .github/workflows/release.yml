@@ -3,60 +3,114 @@ name: Auto Verify and Release
 on:
   push:
     branches:
-      - main # Triggers when you push to the main branch
-# Add this block to grant write permissions to the repository contents
+      - main
+
 permissions:
   contents: write
+  pages: write
+  id-token: write
+
 jobs:
   build-and-release:
-    # Only runs if your commit message starts with "release:" (e.g., "release: A1")
     if: startsWith(github.event.head_commit.message, 'release:')
     runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.release_url.outputs.url }}
+    concurrency:
+      group: github-pages
+      cancel-in-progress: false
 
     steps:
-    - name: Checkout Code
-      uses: actions/checkout@v4
+      - name: Checkout Code
+        uses: actions/checkout@v4
 
-    # Guideline Check 1: Run code AT LEAST once to verify functionality
-    # - name: Verify Code Functionality
-    #   run: |
-    #     echo "Running local verification..."
-    #     # Replace the line below with your actual execution command (e.g., python main.py)
-    #     python -m unittest discover -s tests || echo "Ensure code runs before releasing!"
+      - name: Extract Release Name
+        id: get_tag
+        env:
+          COMMIT_MESSAGE: ${{ github.event.head_commit.message }}
+        run: |
+          release_name="$(printf '%s\n' "$COMMIT_MESSAGE" | head -n 1 | sed -E 's/^release:[[:space:]]*//; s/[[:space:]]+$//')"
+          if [[ ! "$release_name" =~ ^[A-Za-z0-9][A-Za-z0-9._-]*$ ]]; then
+            echo "Commit subject must be 'release: <name>' (letters, numbers, dots, underscores, and hyphens only)." >&2
+            exit 1
+          fi
+          echo "tag=$release_name" >> "$GITHUB_OUTPUT"
 
-    # Guideline Check 2: Ensure completion status file exists
-    # - name: Verify Status File Exists
-    #   run: |
-    #     if [ ! -f "status.md" ] && [ ! -f "status.txt" ]; then
-    #       echo "ERROR: status.md or status.txt is missing! Grade reduction risk."
-    #       exit 1
-    #     fi
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
 
-# Parse the Tag from your commit message (handles multi-line safely)
-    - name: Extract Tag Name
-      id: get_tag
-      run: |
-        # 1. Get the very first line of the commit message
-        FIRST_LINE=$(echo "${{ github.event.head_commit.message }}" | head -n 1)
-        
-        # 2. Extract the tag (the second word after "release:")
-        TAG_NAME=$(echo "$FIRST_LINE" | cut -d' ' -f2)
-        
-        # 3. Write securely to $GITHUB_OUTPUT using EOF for safety
-        echo "tag<<EOF" >> $GITHUB_OUTPUT
-        echo "$TAG_NAME" >> $GITHUB_OUTPUT
-        echo "EOF" >> $GITHUB_OUTPUT
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
 
-    # Automate Steps 1-5 of the PDF: Create and publish the GitHub Release
-    - name: Create GitHub Release
-      uses: softprops/action-gh-release@v2
-      with:
-        tag_name: ${{ steps.get_tag.outputs.tag }}
-        name: Release ${{ steps.get_tag.outputs.tag }}
-        body: |
-          Automated submission for ${{ steps.get_tag.outputs.tag }}.
-          Please find the completion status in the attached status.md file.
-        draft: false
-        prerelease: false
-      env:
-        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: pnpm
+          cache-dependency-path: my-app/pnpm-lock.yaml
+
+      - name: Install dependencies
+        working-directory: my-app
+        run: pnpm install --frozen-lockfile
+
+      - name: Build app
+        working-directory: my-app
+        env:
+          REPOSITORY_NAME: ${{ github.event.repository.name }}
+          RELEASE_NAME: ${{ steps.get_tag.outputs.tag }}
+        run: pnpm exec vite build --base "/${REPOSITORY_NAME}/${RELEASE_NAME}/"
+
+      - name: Check out existing published releases
+        uses: actions/checkout@v4
+        with:
+          ref: gh-pages
+          path: published
+
+      - name: Add release build to Pages artifact
+        env:
+          RELEASE_NAME: ${{ steps.get_tag.outputs.tag }}
+        run: |
+          rm -rf published/.git
+          mkdir -p "published/$RELEASE_NAME"
+          cp -R my-app/dist/. "published/$RELEASE_NAME/"
+
+      - name: Save published releases
+        uses: peaceiris/actions-gh-pages@v4
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: published
+
+      - name: Upload Pages artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: published
+
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
+
+      - name: Set release URL
+        id: release_url
+        env:
+          PAGE_URL: ${{ steps.deployment.outputs.page_url }}
+          RELEASE_NAME: ${{ steps.get_tag.outputs.tag }}
+        run: echo "url=${PAGE_URL%/}/$RELEASE_NAME/" >> "$GITHUB_OUTPUT"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.get_tag.outputs.tag }}
+          name: Release ${{ steps.get_tag.outputs.tag }}
+          body: |
+            Automated submission for ${{ steps.get_tag.outputs.tag }}.
+            Please find the completion status in the attached status.md file.
+
+            Deployed site: ${{ steps.release_url.outputs.url }}
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
