@@ -22,6 +22,17 @@ const useMedia = () => {
 };
 
 const useUser = () => {
+  const postUser = useCallback(async (inputs) => {
+    const fetchOptions = {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(inputs),
+    };
+    return fetchData(`${import.meta.env.VITE_AUTH_API}/users`, fetchOptions);
+  }, []);
+
   const getUserByToken = useCallback(async (token) => {
     const fetchOptions = {
       method: 'GET',
@@ -32,7 +43,7 @@ const useUser = () => {
     return fetchData(`${import.meta.env.VITE_AUTH_API}/users/token`, fetchOptions);
   }, []);
 
-  return { getUserByToken };
+  return { getUserByToken, postUser };
 };
 
 const useAuthentication = () => {
