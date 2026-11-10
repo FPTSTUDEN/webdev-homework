@@ -106,10 +106,8 @@ jobs:
           tag_name: ${{ steps.get_tag.outputs.tag }}
           name: Release ${{ steps.get_tag.outputs.tag }}
           body: |
-            Automated submission for ${{ steps.get_tag.outputs.tag }}.
-            Please find the completion status in the attached status.md file.
-
             Deployed site: ${{ steps.release_url.outputs.url }}
+            The source code for this release can be found below.
           draft: false
           prerelease: false
         env:
