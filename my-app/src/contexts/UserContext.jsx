@@ -36,7 +36,7 @@ const UserProvider = ({ children }) => {
     }
   }, [navigate]);
 
-  const handleAutoLogin = async () => {
+  const handleAutoLogin = useCallback(async () => {
     try {
       const token = localStorage.getItem('token');
       if (!token) {
@@ -49,7 +49,7 @@ const UserProvider = ({ children }) => {
     } catch (error) {
       console.error(error.message);
     }
-  };
+  }, [getUserByToken, navigate]);
 
   return (
     <UserContext.Provider value={{ user, handleLogin, handleLogout, handleAutoLogin }}>
