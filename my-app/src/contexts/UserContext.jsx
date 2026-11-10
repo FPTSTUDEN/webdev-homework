@@ -1,4 +1,4 @@
-import { createContext, useState } from 'react';
+import { createContext, useCallback, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { useAuthentication, useUser } from '../hooks/apiHooks';
 
@@ -26,7 +26,7 @@ const UserProvider = ({ children }) => {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = useCallback(() => {
     try {
       localStorage.removeItem('token');
       setUser(null);
@@ -34,7 +34,7 @@ const UserProvider = ({ children }) => {
     } catch (error) {
       console.error(error.message);
     }
-  };
+  }, [navigate]);
 
   const handleAutoLogin = async () => {
     try {
