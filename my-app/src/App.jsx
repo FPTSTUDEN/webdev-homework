@@ -1,5 +1,6 @@
 import { Route, BrowserRouter, Routes } from 'react-router';
 import Layout from './components/Layout';
+import ProtectedRoute from './components/ProtectedRoute';
 import Home from './views/Home';
 import Login from './views/Login';
 import Logout from './views/Logout';
@@ -17,8 +18,22 @@ const App = () => {
             <Route path="/" element={<Home />} />
             <Route path="/login" element={<Login />} />
             <Route path="/logout" element={<Logout />} />
-            <Route path="/profile" element={<Profile />} />
-            <Route path="/upload" element={<Upload />} />
+            <Route
+              path="/profile"
+              element={
+                <ProtectedRoute>
+                  <Profile />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/upload"
+              element={
+                <ProtectedRoute>
+                  <Upload />
+                </ProtectedRoute>
+              }
+            />
             <Route path="/single" element={<Single />} />
           </Route>
         </Routes>
