@@ -1,8 +1,10 @@
 import { useCallback, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
 import { fetchData } from '../utils/fetchData';
 
 const useMedia = () => {
   const [mediaArray, setMediaArray] = useState([]);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const getMedia = async () => {
@@ -57,7 +59,45 @@ const useMedia = () => {
     return response.data ?? response;
   }, []);
 
-  return { mediaArray, postMedia };
+  const deleteMedia = useCallback(async (mediaId) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('You must be logged in to delete media');
+    }
+
+    const response = await fetchData(
+      `${import.meta.env.VITE_MEDIA_API}/media/${mediaId}`,
+      {
+        method: 'DELETE',
+        headers: { Authorization: `Bearer ${token}` },
+      },
+    );
+    navigate(0);
+    return response.data ?? response;
+  }, [navigate]);
+
+  const modifyMedia = useCallback(async (mediaId, inputs) => {
+    const token = localStorage.getItem('token');
+    if (!token) {
+      throw new Error('You must be logged in to modify media');
+    }
+
+    const response = await fetchData(
+      `${import.meta.env.VITE_MEDIA_API}/media/${mediaId}`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(inputs),
+      },
+    );
+    navigate(0);
+    return response.data ?? response;
+  }, [navigate]);
+
+  return { mediaArray, postMedia, deleteMedia, modifyMedia };
 };
 
 const useFile = () => {

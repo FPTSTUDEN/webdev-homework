@@ -17,6 +17,7 @@ const Home = () => {
             <th className="px-4 py-3 font-semibold">Created</th>
             <th className="px-4 py-3 font-semibold">Size</th>
             <th className="px-4 py-3 font-semibold">Type</th>
+            <th className="px-4 py-3 font-semibold">Actions</th>
           </tr>
         </thead>
         <tbody>
