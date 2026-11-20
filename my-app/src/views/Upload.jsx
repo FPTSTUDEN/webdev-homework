@@ -48,11 +48,12 @@ const Upload = () => {
 
   return (
     <>
-      <h1>Upload</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="title">Title</label>
+      <h1 className="my-8 text-[56px] leading-tight font-medium tracking-[-1.68px] text-heading max-[1024px]:my-5 max-[1024px]:text-4xl">Upload</h1>
+      <form className="mx-auto max-w-xl space-y-5 text-left" onSubmit={handleSubmit}>
+        <div className="space-y-1">
+          <label className="block font-medium text-heading" htmlFor="title">Title</label>
           <input
+            className="w-full rounded-md border border-outline bg-canvas px-3 py-2 text-copy outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             name="title"
             type="text"
             id="title"
@@ -60,9 +61,10 @@ const Upload = () => {
             onChange={handleInputChange}
           />
         </div>
-        <div>
-          <label htmlFor="description">Description</label>
+        <div className="space-y-1">
+          <label className="block font-medium text-heading" htmlFor="description">Description</label>
           <textarea
+            className="w-full resize-y rounded-md border border-outline bg-canvas px-3 py-2 text-copy outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             name="description"
             rows={5}
             id="description"
@@ -70,9 +72,10 @@ const Upload = () => {
             onChange={handleInputChange}
           />
         </div>
-        <div>
-          <label htmlFor="file">File</label>
+        <div className="space-y-1">
+          <label className="block font-medium text-heading" htmlFor="file">File</label>
           <input
+            className="block w-full rounded-md border border-outline bg-canvas p-2 text-copy file:mr-3 file:rounded file:border-0 file:bg-panel file:px-3 file:py-1 file:text-copy"
             name="file"
             type="file"
             id="file"
@@ -81,12 +84,13 @@ const Upload = () => {
           />
         </div>
         <img
+          className="mx-auto rounded-lg border border-outline object-cover"
           src={previewUrl || 'https://placehold.co/200?text=Choose+image'}
           alt="preview"
           width="200"
         />
-        {error && <p role="alert">{error}</p>}
-        <button type="submit" disabled={!file || inputs.title.length <= 3}>
+        {error && <p className="rounded-md bg-red-100 p-3 text-red-800 dark:bg-red-950 dark:text-red-200" role="alert">{error}</p>}
+        <button className="rounded-md bg-accent px-5 py-2 font-semibold text-white transition-opacity hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-50" type="submit" disabled={!file || inputs.title.length <= 3}>
           Upload
         </button>
       </form>

@@ -26,21 +26,21 @@ const Profile = () => {
   }, [getUserByToken, token]);
 
   if (!token) {
-    return <p>Please log in to view your profile.</p>;
+    return <p className="text-copy">Please log in to view your profile.</p>;
   }
 
   if (error) {
-    return <p>{error}</p>;
+    return <p className="text-red-700 dark:text-red-300">{error}</p>;
   }
 
   if (!user) {
-    return <p>Loading profile...</p>;
+    return <p className="text-copy">Loading profile...</p>;
   }
 
   return (
     <section>
-      <h2>Profile</h2>
-      <p>Username: {user.username}</p>
+      <h2 className="mb-4 text-2xl leading-[1.18] font-medium tracking-[-0.24px] text-heading max-[1024px]:text-xl">Profile</h2>
+      <p className="mb-2">Username: {user.username}</p>
       <p>Email: {user.email}</p>
     </section>
   );

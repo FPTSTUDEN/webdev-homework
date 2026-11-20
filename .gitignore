@@ -1,4 +1,6 @@
 .vscode
+!my-app/.vscode/
+!my-app/.vscode/extensions.json
 .idea
 node_modules
 .DS_Store

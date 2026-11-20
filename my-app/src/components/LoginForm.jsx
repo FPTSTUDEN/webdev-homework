@@ -23,11 +23,12 @@ const LoginForm = () => {
 
   return (
     <>
-      <h1>Login</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="loginuser">Username</label>
+      <h1 className="my-8 text-[56px] leading-tight font-medium tracking-[-1.68px] text-heading max-[1024px]:my-5 max-[1024px]:text-4xl">Login</h1>
+      <form className="mx-auto max-w-md space-y-5 text-left" onSubmit={handleSubmit}>
+        <div className="space-y-1">
+          <label className="block font-medium text-heading" htmlFor="loginuser">Username</label>
           <input
+            className="w-full rounded-md border border-outline bg-canvas px-3 py-2 text-copy outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             name="username"
             type="text"
             id="loginuser"
@@ -36,9 +37,10 @@ const LoginForm = () => {
             value={inputs.username}
           />
         </div>
-        <div>
-          <label htmlFor="loginpassword">Password</label>
+        <div className="space-y-1">
+          <label className="block font-medium text-heading" htmlFor="loginpassword">Password</label>
           <input
+            className="w-full rounded-md border border-outline bg-canvas px-3 py-2 text-copy outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             name="password"
             type="password"
             id="loginpassword"
@@ -47,7 +49,7 @@ const LoginForm = () => {
             value={inputs.password}
           />
         </div>
-        <button type="submit">Login</button>
+        <button className="rounded-md bg-accent px-5 py-2 font-semibold text-white transition-opacity hover:opacity-90" type="submit">Login</button>
       </form>
     </>
   );

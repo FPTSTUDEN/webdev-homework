@@ -7,23 +7,23 @@ const Single = () => {
   if (!item) {
     return (
       <>
-        <p>No media item was selected.</p>
-        <Link to="/">Back to Home</Link>
+        <p className="mb-3">No media item was selected.</p>
+        <Link className="text-accent underline-offset-4 hover:underline" to="/">Back to Home</Link>
       </>
     );
   }
 
   return (
     <article>
-      <h2>{item.title}</h2>
-      <p>{item.description}</p>
+      <h2 className="mb-2 text-2xl leading-[1.18] font-medium tracking-[-0.24px] text-heading max-[1024px]:text-xl">{item.title}</h2>
+      <p className="mb-4">{item.description}</p>
       {item.media_type.startsWith('image/') ? (
-        <img src={item.filename} alt={item.title} />
+        <img className="mx-auto max-h-[70vh] max-w-full rounded-lg object-contain" src={item.filename} alt={item.title} />
       ) : (
-        <video controls src={item.filename} aria-label={item.title} />
+        <video className="mx-auto max-h-[70vh] max-w-full rounded-lg" controls src={item.filename} aria-label={item.title} />
       )}
       <p>
-        <Link to="/">Back to Home</Link>
+        <Link className="text-accent underline-offset-4 hover:underline" to="/">Back to Home</Link>
       </p>
     </article>
   );

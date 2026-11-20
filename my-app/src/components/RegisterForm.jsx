@@ -22,11 +22,12 @@ const RegisterForm = () => {
 
   return (
     <>
-      <h1>Register</h1>
-      <form onSubmit={handleSubmit}>
-        <div>
-          <label htmlFor="registeruser">Username</label>
+      <h1 className="my-8 text-[56px] leading-tight font-medium tracking-[-1.68px] text-heading max-[1024px]:my-5 max-[1024px]:text-4xl">Register</h1>
+      <form className="mx-auto max-w-md space-y-5 text-left" onSubmit={handleSubmit}>
+        <div className="space-y-1">
+          <label className="block font-medium text-heading" htmlFor="registeruser">Username</label>
           <input
+            className="w-full rounded-md border border-outline bg-canvas px-3 py-2 text-copy outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             name="username"
             type="text"
             id="registeruser"
@@ -35,9 +36,10 @@ const RegisterForm = () => {
             value={inputs.username}
           />
         </div>
-        <div>
-          <label htmlFor="registeremail">Email</label>
+        <div className="space-y-1">
+          <label className="block font-medium text-heading" htmlFor="registeremail">Email</label>
           <input
+            className="w-full rounded-md border border-outline bg-canvas px-3 py-2 text-copy outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             name="email"
             type="email"
             id="registeremail"
@@ -46,9 +48,10 @@ const RegisterForm = () => {
             value={inputs.email}
           />
         </div>
-        <div>
-          <label htmlFor="registerpassword">Password</label>
+        <div className="space-y-1">
+          <label className="block font-medium text-heading" htmlFor="registerpassword">Password</label>
           <input
+            className="w-full rounded-md border border-outline bg-canvas px-3 py-2 text-copy outline-none focus:border-accent focus:ring-2 focus:ring-accent/20"
             name="password"
             type="password"
             id="registerpassword"
@@ -57,7 +60,7 @@ const RegisterForm = () => {
             value={inputs.password}
           />
         </div>
-        <button type="submit">Register</button>
+        <button className="rounded-md bg-accent px-5 py-2 font-semibold text-white transition-opacity hover:opacity-90" type="submit">Register</button>
       </form>
     </>
   );
