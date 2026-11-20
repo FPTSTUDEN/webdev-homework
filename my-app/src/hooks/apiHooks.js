@@ -2,6 +2,7 @@ import { useCallback, useEffect, useState } from 'react';
 import { useNavigate } from 'react-router';
 import { fetchData } from '../utils/fetchData';
 
+
 const useMedia = () => {
   const [mediaArray, setMediaArray] = useState([]);
   const navigate = useNavigate();
