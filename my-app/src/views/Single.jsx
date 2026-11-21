@@ -1,4 +1,5 @@
 import { Link, useLocation } from 'react-router';
+import Likes from '../components/Likes';
 
 const Single = () => {
   const { state } = useLocation();
@@ -17,6 +18,7 @@ const Single = () => {
     <article>
       <h2 className="mb-2 text-2xl leading-[1.18] font-medium tracking-[-0.24px] text-heading max-[1024px]:text-xl">{item.title}</h2>
       <p className="mb-4">{item.description}</p>
+      <Likes mediaId={item.media_id} />
       {item.media_type.startsWith('image/') ? (
         <img className="mx-auto max-h-[70vh] max-w-full rounded-lg object-contain" src={item.filename} alt={item.title} />
       ) : (

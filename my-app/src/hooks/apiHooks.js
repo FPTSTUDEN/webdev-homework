@@ -101,6 +101,72 @@ const useMedia = () => {
   return { mediaArray, postMedia, deleteMedia, modifyMedia };
 };
 
+const useLike = () => {
+  const postLike = useCallback(async (mediaId, token) => {
+    // useCallback is used to memoize the function and prevent unnecessary re-renders
+    // it is used here to ensure that the function is only recreated if the dependencies change, which in this case is an empty array, meaning it will only be created once when the component mounts.
+
+
+    // Check if the token is provided, if not throw an error
+    if (!token) {
+      throw new Error('You must be logged in to like media');
+    }
+
+    return fetchData(`${import.meta.env.VITE_MEDIA_API}/likes`, {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${token}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ media_id: Number(mediaId) }),
+    });
+  }, []);
+
+  const deleteLike = useCallback(async (likeId, token) => {
+    if (!token) {
+      throw new Error('You must be logged in to remove a like');
+    }
+
+    return fetchData(`${import.meta.env.VITE_MEDIA_API}/likes/${likeId}`, {
+      method: 'DELETE',
+      headers: { Authorization: `Bearer ${token}` },
+    });
+  }, []);
+
+  const getLikeCountByMediaId = useCallback(async (mediaId) => {
+    try {
+      // use the fetchData function to get the like count for a specific media item
+      // use try/catch to handle the case where there are no likes for the media item
+      return await fetchData(`${import.meta.env.VITE_MEDIA_API}/likes/count/${mediaId}`);
+    } catch (error) {
+      if (error.message === 'No likes found') {
+        return { count: 0 };
+      }
+      throw error;
+    }
+  }, []);
+
+  const getLikeByUser = useCallback(async (mediaId, token) => {
+    if (!token) {
+      throw new Error('You must be logged in to check your like');
+    }
+
+    try {
+      return await fetchData(
+        `${import.meta.env.VITE_MEDIA_API}/likes/bymedia/user/${mediaId}`,
+        { headers: { Authorization: `Bearer ${token}` } },
+      );
+    } catch (error) {
+      if (error.message === 'Like not found') {
+        return null;
+      }
+      throw error;
+    }
+  }, []);
+
+  return { postLike, deleteLike, getLikeCountByMediaId, getLikeByUser };
+};
+
 const useFile = () => {
   const postFile = useCallback(async (file, token) => {
     const uploadServer = import.meta.env.VITE_UPLOAD_SERVER;
@@ -169,4 +235,4 @@ const useAuthentication = () => {
   return { postLogin };
 };
 
-export { useAuthentication, useFile, useMedia, useUser };
+export { useAuthentication, useFile, useLike, useMedia, useUser };
