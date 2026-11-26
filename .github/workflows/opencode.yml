@@ -34,5 +34,5 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           CUSTOM_LLM_API_KEY: ${{ secrets.CUSTOM_LLM_API_KEY }}
         with:
-          model: myendpoint/gpt-6-luna
+          model: azure-v1/gpt-6-luna
           use_github_token: true
