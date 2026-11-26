@@ -35,18 +35,18 @@ async function loadRestaurants() {
     console.warn("Could not load restaurants from API; using local data:", error);
   }
 
-  document.querySelector("#restaurant-list").innerHTML += restaurantList
-    .map(
-      restaurant =>
-        `<tr class="restaurant-row" id="${restaurant._id}"><td>${restaurant.name}</td><td>${restaurant.address}</td></tr>`,
-    )
-    .sort()
-    .join("");
+  const restaurantTable = document.querySelector("#restaurant-list");
+  const rows = restaurantList.map(restaurant => {
+    const row = document.createElement("tr");
+    row.classList.add("restaurant-row");
 
-  document.querySelectorAll(".restaurant-row").forEach(row => {
+    const nameCell = document.createElement("td");
+    nameCell.textContent = restaurant.name;
+    const addressCell = document.createElement("td");
+    addressCell.textContent = restaurant.address;
+    row.append(nameCell, addressCell);
+
     row.addEventListener("click", async function () {
-      const restaurant = restaurantList.find(r => r._id === row.id);
-
       document.querySelectorAll(".restaurant-row").forEach(r => r.classList.remove("highlight"));
       row.classList.add("highlight");
 
@@ -58,14 +58,21 @@ async function loadRestaurants() {
         alert("Could not load the menu. Please try again.");
         return;
       }
-      dialog.innerHTML = menu.courses
-        .map(course => `<p>${course.name} - ${course.price} - ${course.diets}</p>`)
-        .join("");
-      dialog.innerHTML += `<button id="close">Close</button>`;
-      dialog.showModal();
-      document.querySelector('#close').addEventListener('click', function () {
+
+      dialog.replaceChildren();
+      menu.courses.forEach(course => {
+        const paragraph = document.createElement("p");
+        paragraph.textContent = `${course.name} - ${course.price} - ${course.diets}`;
+        dialog.append(paragraph);
+      });
+
+      const closeButton = document.createElement("button");
+      closeButton.textContent = "Close";
+      closeButton.addEventListener("click", function () {
         dialog.close();
       });
+      dialog.append(closeButton);
+      dialog.showModal();
 
       alert(`Restaurant: ${restaurant.name}
         \nAddress: ${restaurant.address}
@@ -76,6 +83,7 @@ async function loadRestaurants() {
         `);
     });
   });
+  restaurantTable.append(...rows);
 }
 
 loadRestaurants().catch(error => console.error("Could not load restaurants:", error));
