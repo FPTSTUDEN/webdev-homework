@@ -1,25 +1,41 @@
 
 import restaurants from "./restaurants.js";
 
-async function getMenu(restaurant) {
-  const response = await fetch(`https://media2.edu.metropolia.fi/restaurant/api/v1/restaurants/daily/${restaurant._id}/en`);
-  if (!response.ok) {
-    throw new Error("Error" + response.status);
+const REQUEST_TIMEOUT_MS = 5000;
+
+async function fetchJson(url) {
+  const controller = new AbortController();
+  const timeout = setTimeout(() => controller.abort(), REQUEST_TIMEOUT_MS);
+  try {
+    const response = await fetch(url, { signal: controller.signal });
+    if (!response.ok) {
+      throw new Error("Error" + response.status);
+    }
+    return await response.json();
+  } finally {
+    clearTimeout(timeout);
   }
-  return  response.json();
+}
+
+async function getMenu(restaurant) {
+  return fetchJson(`https://media2.edu.metropolia.fi/restaurant/api/v1/restaurants/daily/${restaurant._id}/en`);
 }
 const restaurant_api = "https://media2.edu.metropolia.fi/restaurant/api/v1/restaurants"
 
 const dialog = document.querySelector("dialog");
 async function loadRestaurants() {
-  const response = await fetch(restaurant_api);
-  if (!response.ok) {
-    throw new Error("Error" + response.status);
+  let restaurantList = restaurants;
+  try {
+    const apiRestaurants = await fetchJson(restaurant_api);
+    if (!Array.isArray(apiRestaurants)) {
+      throw new Error("Invalid restaurant list response");
+    }
+    restaurantList = apiRestaurants;
+  } catch (error) {
+    console.warn("Could not load restaurants from API; using local data:", error);
   }
 
-  restaurants = await response.json();
-
-  document.querySelector("#restaurant-list").innerHTML += restaurants
+  document.querySelector("#restaurant-list").innerHTML += restaurantList
     .map(
       restaurant =>
         `<tr class="restaurant-row" id="${restaurant._id}"><td>${restaurant.name}</td><td>${restaurant.address}</td></tr>`,
@@ -29,12 +45,19 @@ async function loadRestaurants() {
 
   document.querySelectorAll(".restaurant-row").forEach(row => {
     row.addEventListener("click", async function () {
-      const restaurant = restaurants.find(r => r._id === row.id);
+      const restaurant = restaurantList.find(r => r._id === row.id);
 
       document.querySelectorAll(".restaurant-row").forEach(r => r.classList.remove("highlight"));
       row.classList.add("highlight");
 
-      const menu = await getMenu(restaurant);
+      let menu;
+      try {
+        menu = await getMenu(restaurant);
+      } catch (error) {
+        console.error("Could not load menu:", error);
+        alert("Could not load the menu. Please try again.");
+        return;
+      }
       dialog.innerHTML = menu.courses
         .map(course => `<p>${course.name} - ${course.price} - ${course.diets}</p>`)
         .join("");
