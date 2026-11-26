@@ -1,0 +1,16 @@
+{
+  "$schema": "https://opencode.ai/config.json",
+  "provider": {
+    "azure-v1": {
+      "npm": "@ai-sdk/openai-compatible",
+      "name": "Azure OpenAI v1",
+      "options": {
+        "baseURL": "https://quandn-0067-resource.services.ai.azure.com/openai/v1",
+        "apiKey": "{env:CUSTOM_LLM_API_KEY}"
+      },
+      "models": {
+        "gpt-6-luna": { "name": "gpt-6-luna" }
+      }
+    }
+  }
+}
