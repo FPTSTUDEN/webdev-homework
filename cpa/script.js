@@ -36,7 +36,10 @@ async function loadRestaurants() {
   }
 
   const restaurantTable = document.querySelector("#restaurant-list");
-  const rows = restaurantList.map(restaurant => {
+  const sortedRestaurants = [...restaurantList].sort((a, b) =>
+    a.name.localeCompare(b.name),
+  );
+  const rows = sortedRestaurants.map(restaurant => {
     const row = document.createElement("tr");
     row.classList.add("restaurant-row");
 
