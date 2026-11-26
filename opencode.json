@@ -2,7 +2,7 @@
   "$schema": "https://opencode.ai/config.json",
   "provider": {
     "azure-v1": {
-      "npm": "@ai-sdk/openai-compatible",
+      "npm": "@ai-sdk/azure",
       "name": "Azure OpenAI v1",
       "options": {
         "baseURL": "https://quandn-0067-resource.services.ai.azure.com/openai/v1",
