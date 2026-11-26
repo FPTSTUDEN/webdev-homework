@@ -82,6 +82,7 @@ async function loadRestaurants() {
         \nCompany: ${restaurant.company}
         `);
     });
+    return row;
   });
   restaurantTable.append(...rows);
 }
