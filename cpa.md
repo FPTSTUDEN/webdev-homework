@@ -1,3 +1,5 @@
+folder: cpa/
+
 # Individual Assignment – Web Application
 
 The objective of this assignment is to build a functional web application.

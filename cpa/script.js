@@ -1,5 +1,6 @@
 
 import restaurants from "./restaurants.js";
+import { DAILY_MENU_URL, RESTAURANT_LIST_URL } from "./vars.js";
 
 const REQUEST_TIMEOUT_MS = 5000;
 
@@ -18,15 +19,14 @@ async function fetchJson(url) {
 }
 
 async function getMenu(restaurant) {
-  return fetchJson(`https://media2.edu.metropolia.fi/restaurant/api/v1/restaurants/daily/${restaurant._id}/en`);
+  return fetchJson(DAILY_MENU_URL(restaurant._id));
 }
-const restaurant_api = "https://media2.edu.metropolia.fi/restaurant/api/v1/restaurants"
 
 const dialog = document.querySelector("dialog");
 async function loadRestaurants() {
   let restaurantList = restaurants;
   try {
-    const apiRestaurants = await fetchJson(restaurant_api);
+    const apiRestaurants = await fetchJson(RESTAURANT_LIST_URL);
     if (!Array.isArray(apiRestaurants)) {
       throw new Error("Invalid restaurant list response");
     }
