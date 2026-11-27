@@ -99,6 +99,10 @@ async function loadRestaurants() {
       heading.textContent = restaurant.name;
       dialog.append(heading);
 
+      const details = document.createElement("p");
+      details.textContent = `${restaurant.address}, ${restaurant.postalCode} ${restaurant.city}`;
+      dialog.append(details);
+
       const menuContainer = document.createElement("section");
       menuContainer.setAttribute("aria-live", "polite");
 
@@ -131,14 +135,6 @@ async function loadRestaurants() {
       });
       dialog.append(closeButton);
       dialog.showModal();
-
-      alert(`Restaurant: ${restaurant.name}
-        \nAddress: ${restaurant.address}
-        \nPostal Code: ${restaurant.postalCode}
-        \nCity: ${restaurant.city}
-        \nPhone: ${restaurant.phone}
-        \nCompany: ${restaurant.company}
-        `);
     });
     return row;
   });
